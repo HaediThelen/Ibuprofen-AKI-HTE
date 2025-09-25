@@ -17,7 +17,7 @@ library(janitor)
   # Load in data
   #data <- read_dta("./data/nsaid_bmi.dta") 
   #TEMPORARY
-  data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/nsaid_bmi.dta")
+  data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
   
   # Clean data and and prep for balanceR 
   data <- data %>% 
