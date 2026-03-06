@@ -14,9 +14,9 @@ library(tibble)
 # Ibuprofen effect on AKI - evaluation of HTE by  age
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/nsaid_bmi.dta") 
+#data <- read_dta("./data/ibu-aki-data.dta") 
 #TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/nsaid_bmi.dta")
+data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
 
   # Clean data and and prep for balanceR, make age quintiles 
   data <- data %>% 

@@ -463,6 +463,15 @@ bal.plot.clean.bin <- function(data, weights, strata, treatment, covs, subset = 
       long.names <- long.names[!long.names %in% drop_names]
     }
     
+    if (strata == "periOp.bin") {
+      # Names to drop
+      drop_names <- c(
+        "Post Op", "POD 0", "POD 1", "POD 2", "POD3"
+      )
+      
+      long.names <- long.names[!long.names %in% drop_names]
+    }
+    
     rownames(um.wt.tab) <- long.names
     rownames(bal.wt.tab) <- long.names
     
@@ -500,6 +509,16 @@ bal.plot.clean.bin <- function(data, weights, strata, treatment, covs, subset = 
           plot_title <- paste0(main.title, " (no ", var_name, ")")
         } else if (i == 3) {
           plot_title <- paste0(main.title, " (with ", var_name, ")")
+        }
+      } 
+      else if (strata == "periOp.bin") {
+        var_name <- "Post Operative"
+        if (i == 1) {
+          plot_title <- main.title
+        } else if (i == 2) {
+          plot_title <- paste0(main.title, " (no ", var_name, ")")
+        } else if (i == 3) {
+          plot_title <- paste0(main.title, " (yes ", var_name, ")")
         }
       } else {
         # Fallback for other strata
@@ -555,7 +574,9 @@ composite.bal.plot.bin <- function(plot.list, main.title, strata) {
     subplot_titles <- c("Without DM", "With DM")
   } else if (strata == "chf.cat") {
     subplot_titles <- c("Without HF", "With HF")
-  } else {
+  } else if (strata == "periOp.bin") {
+    subplot_titles <- c("Not Post-Op", "Post-Op")
+  }else {
     # Fallback for other strata
     subplot_titles <- paste0("Group ", 1:length(plot.list))
   }

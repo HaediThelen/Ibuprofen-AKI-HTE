@@ -19,7 +19,7 @@
 ************************************************************************
 // Check linearity of kEver with age
 	//twoway lowess kEver age	
-	histogram age
+	histogram age, width (2)
 
 // Fit interaction model with continuous age
 	poisson kEver i.pain##c.age[pweight = ATTwts], exposure(pTime1000) irr
