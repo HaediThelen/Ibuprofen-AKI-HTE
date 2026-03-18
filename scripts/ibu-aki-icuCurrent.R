@@ -10,7 +10,7 @@ library(tableone)
 library(survey)
 library(tibble)
 
-# Ibuprofen effect on AKI - evaluation of HTE by HF
+# Ibuprofen effect on AKI - evaluation of HTE by ICU Status
 # Step 0: Prep
 # Load in data
 #data <- read_dta("./data/ibu-aki-data.dta") 
@@ -23,7 +23,7 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
     filter(bmi > 14 & bmi <70) %>%
     mutate(across(where(is.numeric), as.numeric)) %>%
     mutate(across(where(~ all(. %in% c(0, 1))), as.integer)) %>%
-    mutate(chf.cat = as.factor(chf)) %>%
+    mutate(icuCurrent.cat = as.factor(icuCurrent)) %>%
     mutate(race.white = if_else(race == 0, 1, 0),  #make dummy variables
            race.black = if_else(race == 1, 1, 0),
            race.other = if_else(race == 2, 1, 0)) %>%
@@ -202,7 +202,7 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
   # Choose all covs to evaluate SMDs
   covs <- c("age", "sex", "race.white", "race.black", "race.other", "admType", 
             "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
-            "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
+            "presentation.or", "presentation.floor", "presentation.other", "priorLos",
             "periOp.no", "periOp.0", "periOp.1", "periOp.2", "periOp.3", "baseVentCurrent", 
             "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
             "cva", "pvd", "pCirc", "cpd", "liver", "dm.no", "dm.noncomp", "dm.comp", "ckd", 
@@ -214,10 +214,10 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
             "abxNTX", "ntxOther", "pressBase", "bmi")
 
   # Create SMD tables within each BMI level
-    chf.values <- 0:1
+  icuCurrent.values <- 0:1
     source("./functions/overlap-eval.R")
-    smd.tab.list <- lapply(chf.values, function(chf.value) {
-      subset <- data.smdtab %>% filter(chf.cat == chf.value)
+    smd.tab.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data.smdtab %>% filter(icuCurrent.cat == icuCurrent.value)
       smd.table(subset, covs)
     })
     View(smd.tab.list[[1]])
@@ -232,8 +232,8 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
     density.plots <- dplots(data.factor, continuous.covs, "pain") 
     
   # Plot density curves in subsets
-    density.plots.list <- lapply(chf.values, function(chf.value) {
-      subset <- data.factor %>% filter(chf.cat == chf.value)
+    density.plots.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data.factor %>% filter(icuCurrent.cat == icuCurrent.value)
       dplots(subset, continuous.covs, "pain")
     })
     print(density.plots.list[[1]])
@@ -244,20 +244,20 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
     tab
     
   # Compare Number Summaries of continuous covariates  in subsets 
-    num.summary.list <- lapply(chf.values, function(chf.value) {
-      subset <- data.factor %>% filter(chf.cat == chf.value)
+    num.summary.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data.factor %>% filter(icuCurrent.cat == icuCurrent.value)
       sum.tabs(subset, continuous.covs, "pain")
     })
     print(num.summary.list[[1]])
     print(num.summary.list[[2]])
     
 # Step 3: Estimate Weights
-    # Remove CHF from this list:
+    # Remove icuCurrent from this list:
   covs <- c(colnames(age.sp), "sex", "race.white", "race.black", "race.other", "admType", 
             "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
-            "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
+            "presentation.or", "presentation.floor", "presentation.other", "priorLos",
             "periOp.no", "periOp.0", "periOp.1", "periOp.2", "periOp.3", "baseVentCurrent", 
-            "baseVentEver", "mif", "arry", "afib", "valve", 
+            "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
             "cva", "pvd", "pCirc", "cpd", "liver", "dm.no", "dm.noncomp", "dm.comp", "ckd", 
             "wtLoss", "fluid", "cancer.no", "cancer.noncomp", "cancer.metastatic",
             "hiv", colnames(indexGFR.sp), "preAkiStatus", "wbcBase", "hgbBase", "platBase", "labclBase",
@@ -278,8 +278,8 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
     var(lambda.reg$resid)
     
     # Identify Effect Modifier
-    table(data$chf.cat)
-    Z <- data$chf.cat # a factor
+    table(data$icuCurrent.cat)
+    Z <- data$icuCurrent.cat # a factor
     
     # Balance Weights ATT
     # Calculate
@@ -299,9 +299,9 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
   # Table 1 for ATT overall
     covs <- c("age", "sex", "race.white", "race.black", "race.other", "admType", 
                 "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
-                "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
+                "presentation.or", "presentation.floor", "presentation.other", "priorLos",
                 "periOp.no", "periOp.0", "periOp.1", "periOp.2", "periOp.3", "baseVentCurrent", 
-                "baseVentEver", "mif", "arry", "afib", "valve", 
+                "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
                 "cva", "pvd", "pCirc", "cpd", "liver", "dm.no", "dm.noncomp", "dm.comp", "ckd", 
                 "wtLoss", "fluid", "cancer.no", "cancer.noncomp", "cancer.metastatic",
                 "hiv", "indexGFR", "preAkiStatus", "wbcBase", "hgbBase", "platBase", "labclBase",
@@ -314,49 +314,49 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
     detach(package:Hmisc, unload=TRUE)
     source("./functions/balance-plots.R")
   # ATT (Balwts)
-    bal.plots.ATT <- bal.plots(data, "ATTwts", "chf.cat", 'pain', covs) 
-    bal.plots.ATT.clean <- bal.plot.clean.bin(data = data, weights = "ATTwts", strata = "chf.cat", 
-                                              treatment = "pain", covs = covs, subset = TRUE, main.title = "Balance Plot HF")
+    bal.plots.ATT <- bal.plots(data, "ATTwts", "icuCurrent.cat", 'pain', covs) 
+    bal.plots.ATT.clean <- bal.plot.clean.bin(data = data, weights = "ATTwts", strata = "icuCurrent.cat", 
+                                              treatment = "pain", covs = covs, subset = TRUE, main.title = "Balance Plot ICU Status")
     # Save plots
-    if (!dir.exists("./results/hf/balplots")) {
-      dir.create("./results/hf/balplots", recursive = TRUE)
+    if (!dir.exists("./results/icuCurrent/balplots")) {
+      dir.create("./results/icuCurrent/balplots", recursive = TRUE)
     }
     for (i in seq_along(bal.plots.ATT.clean)) {
       plot_i <- bal.plots.ATT.clean[[i]]
-      file_name <- paste0("./results/hf/balplots/balance_plot_HF_", i, ".jpeg")
+      file_name <- paste0("./results/icuCurrent/balplots/balance_plot_icuCurrent_", i, ".jpeg")
       ggsave(filename = file_name, plot = plot_i, device = "jpeg", 
              width = 7, height = 9, units = "in", dpi = 300)
     }
-    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by HF Status", strata = "chf.cat")
+    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by ICU Status", strata = "icuCurrent.cat")
     composite.plot
     
-    ggsave(filename = "./results/hf/balplots/Composite-HF.jpeg", plot = composite.plot, device = "jpeg", 
+    ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent.jpeg", plot = composite.plot, device = "jpeg", 
            width = 10, height = 10, units = "in", dpi = 300)
-    ggsave(filename = "./results/hf/balplots/Composite-HF.pdf", plot = composite.plot, device = "pdf", 
+    ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
   
 
     # Examine Balance in continuous covariate distributions
     source("./functions/density-plot.R")
     dplot("age", data, 'ATTwts')
-    age.density.plots.list <- lapply(chf.values, function(chf.value) {
-      subset <- data %>% filter(chf.cat == chf.value)
+    age.density.plots.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data %>% filter(icuCurrent.cat == icuCurrent.value)
       dplot("age", subset, "ATTwts")
     })
     print(age.density.plots.list[[1]])
     print(age.density.plots.list[[2]])
 
     dplot("indexGFR", data, 'ATTwts')
-    indexGFR.density.plots.list <- lapply(chf.values, function(chf.value) {
-      subset <- data %>% filter(chf.cat == chf.value)
+    indexGFR.density.plots.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data %>% filter(icuCurrent.cat == icuCurrent.value)
       dplot("indexGFR", subset, "ATTwts")
     })
     print(indexGFR.density.plots.list[[1]])
     print(indexGFR.density.plots.list[[2]])
 
     dplot("bmi", data, 'ATTwts')
-    bmi.density.plots.list <- lapply(chf.values, function(chf.value) {
-      subset <- data %>% filter(chf.cat == chf.value)
+    bmi.density.plots.list <- lapply(icuCurrent.values, function(icuCurrent.value) {
+      subset <- data %>% filter(icuCurrent.cat == icuCurrent.value)
       dplot("bmi", subset, "ATTwts")
     })
     print(bmi.density.plots.list[[1]])
@@ -371,6 +371,6 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
       # write to data folder
       #write.dta("./Data/ibu-aki-hf.dta") 
       # TEMPORARY
-      write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-hf.dta") 
+      write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-icuCurrent.dta") 
       
       
