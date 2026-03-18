@@ -352,6 +352,6 @@ ess(data, "pain", "ATTwts")
 # write to data folder
 #write.dta("./Data/ibu-aki-overall.dta") 
 # TEMPORARY
-write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/low-risk-subset.dta")
-write.dta(data, '/Users/haedi/Library/CloudStorage/Box-Box/Projects/Summer Rotation/Code/Data/low-risk-subset.dta')
+#write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/low-risk-subset.dta")
+#write.dta(data, '/Users/haedi/Library/CloudStorage/Box-Box/Projects/Summer Rotation/Code/Data/low-risk-subset.dta')
 
