@@ -13,9 +13,8 @@ library(tibble)
 # Ibuprofen effect on AKI - evaluation of HTE by  BMI
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/ibu-aki-data.dta") 
-#TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
+data <- read_dta("./data/ibu-aki-data.dta") 
+
   
   # Clean data and and prep for balanceR, make BMI quintiles 
   data <- data %>% 
@@ -402,9 +401,8 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
       
       
       # write to data folder
-      #write.dta("./Data/ibu-aki-bmi.dta") 
-      # TEMPORARY
-      write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-bmi.dta") 
+      write.dta(data,"./data/ibu-aki-bmi.dta") 
+
       
   # Calculate values for splines at range of ages for continuous age analysis: 
   spline_vals <- predict(ns(data$bmi, df = 3, intercept = FALSE), newx = seq(15, 50, by = 5))

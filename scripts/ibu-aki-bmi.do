@@ -119,21 +119,29 @@
 	// No spline model
 	poisson kEver i.pain##c.bmi [pweight = ATTwts], exposure(pTime1000) irr
 	estat ic
-
-	// Test margins
-	margins pain, at(bmi=(15(5)50)) noatlegend predict(ir)
+	
+	// get interaction p value
+	test 1.pain#c.bmi
+	local ixn_p = r(p)
+	
 
 	// Set up Excel sheet
 	putexcel set ../results/ibu-aki-bmi-ATT-no-spline.xlsx, replace
 		putexcel A1 = "BMI" B1 = "Pain" C1 ="Margin" D1= "std.err."                ///
-				E1 = "LB" F1 = "UB"                                               ///
+				E1 = "LB" F1 = "UB" G1 = "Ixn p value"                                               ///
 				A2 = "15" A3 = "15" A4 = "20" A5 = "20" A6 = "25" A7 = "25"       ///
 				A8 = "30" A9 = "30" A10 = "35" A11 = "35" A12 = "40" A13 = "40"   ///
 				A14 = "45" A15 = "45" A16 = "50" A17 = "50"                       ///
 				B2 = "0" B3 = "1"  B4 = "0" B5 = "1"  B6 = "0" B7 = "1"           ///
 				B8 = "0" B9 = "1"  B10 = "0" B11 = "1"  B12 = "0" B13 = "1"       ///
 				B14 = "0" B15 = "1"  B16 = "0" B17 = "1" 
+				
+	// insert interaction p value
+		putexcel G2 = `ixn_p'
 
+	// Test margins
+	margins pain, at(bmi=(15(5)50)) noatlegend predict(ir)
+				
 	// Grab margins output and write to Excel
 	matrix result = r(table)
 		putexcel C2 = matrix(result[1,1]) D2 = matrix(result[2,1]) E2 = matrix(result[5,1]) F2 = matrix(result[6,1]) ///
@@ -171,7 +179,7 @@
 // Set up excel sheet
 	putexcel set ../results/ibu-aki-bmi-ATT-spline.xlsx, replace
 		putexcel A1 = "BMI" B1 = "Pain" C1 ="Margin" D1= "std.err." 				///
-				E1 = "LB" F1 = "UB" 												/// 				
+				E1 = "LB" F1 = "UB" G1 = "Ixn p value" 								/// 				
 				A2 = "15" A3 = "15" A4 = "20" A5 = "20" A6 = "25" A7 = "25" 		///	
 				A8 = "30" A9 = "30" A10 = "35" A11 = "35" A12 = "40" A13 = "40" 	///
 				A14 = "45" A15 = "45" A16 = "50" A17 = "50" 						///
@@ -184,6 +192,14 @@ poisson kEver i.pain c.bmi1 c.bmi2 c.bmi3  ///
     c.bmi1#i.pain c.bmi2#i.pain c.bmi3#i.pain  ///
     [pweight=ATTwts], exposure(pTime1000) irr	
 	estat ic
+	
+	// Get interaction p value
+	testparm c.bmi1#i.pain c.bmi2#i.pain c.bmi3#i.pain 
+
+	local ixn_p = r(p)
+	
+	// Insert interaction p value
+	putexcel G2 = `ixn_p'
 
 	///bmi = 15
 	margins 	pain, 			at(												///

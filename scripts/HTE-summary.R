@@ -23,9 +23,6 @@ median(data$pTime)
 quantile(data$pTime, 0.25)
 quantile(data$pTime, 0.75)
 
-# Set WD 
-#TEMPORARY
-setwd('/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/')
 
 #  HTE by age Table 
 egfr.data <- read_excel('./results/ibu-aki-GFR-ATT-no-spline.xlsx')

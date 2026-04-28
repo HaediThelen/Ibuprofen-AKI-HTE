@@ -37,7 +37,7 @@
 putexcel set ../results/ibu-aki-GFR-ATT-IRD.xlsx, replace
 putexcel A1 = "indexGFR" B1 = "IRD" C1 = "std.err." D1 = "LB" E1 = "UB" ///
         A2 = "30" A3 = "40" A4 = "50" A5 = "60" A6 = "70" A7 = "80"         ///
-        A8 = "90" A9 = "100" A10 = "110" A11 = "120" A12 = "130" A13 = "140"
+        A8 = "90" A9 = "100" A10 = "110" A11 = "120" A12 = "130" A13 = "140" 
 		
 	margins, dydx(pain) at(indexGFR=(30(10)140)) noatlegend predict(ir)
 		matrix result = r(table)
@@ -124,10 +124,14 @@ putexcel close
 	poisson kEver i.pain##c.indexGFR [pweight = ATTwts], exposure(pTime1000) irr
 	estat ic
 	
+	// get interaction p value
+	test 1.pain#c.indexGFR
+	local ixn_p = r(p)
+	
 // Set up excel sheet
 	putexcel set ../results/ibu-aki-GFR-ATT-no-spline.xlsx, replace
 		putexcel A1 = "eGFR" B1 = "Pain" C1 ="Margin" D1= "std.err." 				///
-				E1 = "LB" F1 = "UB" 												/// 				
+				E1 = "LB" F1 = "UB" G1 = "Ixn p value" 								/// 				
 				A2 = "20" A3 = "20" A4 = "30" A5 = "30" A6 = "40" A7 = "40" 		///	
 				A8 = "50" A9 = "50" A10 = "60" A11 = "60" A12 = "70" A13 = "70" 	///
 				A14 = "80" A15 = "80" A16 = "90" A17 = "90" A18 = "100" A19 = "100" ///
@@ -137,8 +141,11 @@ putexcel close
 				B8 = "0" B9 = "1"  B10 = "0" B11 = "1"  B12 = "0" B13 = "1"			///
 				B14 = "0" B15 = "1"  B16 = "0" B17 = "1"  B18 = "0" B19 = "1" 	 	///
 				B20 = "0" B21 = "1" B22 = "0" B23 = "1" B24 = "0" B25 = "1"  		///
-				B26 = "0" B27 = "1" B28 = "0" B29 = "1"    
+				B26 = "0" B27 = "1" B28 = "0" B29 = "1"   
 				
+	// insert interaction p value
+	putexcel G2 = `ixn_p'
+	
 	// Test margins
 		margins pain, at(indexGFR=(20(10)150)) noatlegend predict(ir)
 		
@@ -239,13 +246,12 @@ putexcel close
 	
 // Test margins	(update spline values as appropriate)
 	// original code: 
-	margins pain, at(indexGFR=(20(10)150)) noatlegend predict(ir)
-
+	margins pain, at(indexGFR=(20(10)150)) noatlegend predict(ir) 
 
 // Set up excel sheet
 	putexcel set ../results/ibu-aki-GFR-ATT-spline.xlsx, replace
 		putexcel A1 = "eGFR" B1 = "Pain" C1 ="Margin" D1= "std.err." 				///
-				E1 = "LB" F1 = "UB" 												/// 				
+				E1 = "LB" F1 = "UB" G1 = "Ixn p value" 								/// 				
 				A2 = "20" A3 = "20" A4 = "30" A5 = "30" A6 = "40" A7 = "40" 		///	
 				A8 = "50" A9 = "50" A10 = "60" A11 = "60" A12 = "70" A13 = "70" 	///
 				A14 = "80" A15 = "80" A16 = "90" A17 = "90" A18 = "100" A19 = "100" ///
@@ -256,13 +262,21 @@ putexcel close
 				B14 = "0" B15 = "1"  B16 = "0" B17 = "1"  B18 = "0" B19 = "1" 	 	///
 				B20 = "0" B21 = "1" B22 = "0" B23 = "1" B24 = "0" B25 = "1"  		///
 				B26 = "0" B27 = "1" B28 = "0" B29 = "1"    
-		
+					
 // Fit interaction model with continuous indexGFR splines from R
 poisson kEver i.pain c.indexGFR1 c.indexGFR2 c.indexGFR3 c.indexGFR4 ///
     c.indexGFR1#i.pain c.indexGFR2#i.pain c.indexGFR3#i.pain c.indexGFR4#i.pain ///
     [pweight=ATTwts], exposure(pTime1000) irr	
 	estat ic
+	
+	// Get interaction p value
+	testparm c.indexGFR1#i.pain c.indexGFR2#i.pain c.indexGFR3#i.pain c.indexGFR4#i.pain
 
+	local ixn_p = r(p)
+	
+	// Insert interaction p value
+	putexcel G2 = `ixn_p'
+	
 	///eGFR = 20
 	margins 	pain, 			at(														///
 									indexGFR1=(0)										///	

@@ -15,10 +15,8 @@ library(janitor)
 
 # Step 0: Prep
   # Load in data
-  #data <- read_dta("./data/ibu-aki-data.dta") 
-  #TEMPORARY
-  data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta") 
-  
+  data <- read_dta("./data/ibu-aki-data.dta") 
+ 
   # Clean data and and prep for balanceR 
   data <- data %>% 
     filter(pain !=2) %>% # drop patients exposed to both IBU and Opioids
@@ -369,8 +367,7 @@ library(janitor)
         
 # Step 5: Export to Stata for analysis 
         # write to data folder
-        #write.dta("./Data/ibu-aki-overall.dta") 
-        # TEMPORARY
-    write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-overall.dta")
+        write.dta(data,"./data/ibu-aki-overall.dta") 
+
 
 

@@ -10,7 +10,7 @@
 ** Step 1: Load file with balance weights
 ********************************************************************************
 //open file ibu-aki-overall.dta from data directory
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data"
+	cd "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data" 
 	use ibu-aki-overall.dta
 
 ************************************************************************	

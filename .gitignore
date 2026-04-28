@@ -2,6 +2,10 @@
 results/*
 !results/README.md
 
+# Ignore data files
+data/*
+!data/README.md
+
 # History files
 .Rhistory
 .Rapp.history

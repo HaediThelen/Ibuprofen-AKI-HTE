@@ -13,9 +13,7 @@ library(tibble)
 # Ibuprofen effect on AKI - evaluation of HTE by HF
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/ibu-aki-data.dta") 
-#TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
+data <- read_dta("./data/ibu-aki-data.dta") 
 
 # Clean data and and prep for balanceR, make BMI quintiles 
   data <- data %>% 
@@ -369,8 +367,6 @@ data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/
       
 # Step 5: Export to Stata
       # write to data folder
-      #write.dta("./Data/ibu-aki-hf.dta") 
-      # TEMPORARY
-      write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-hf.dta") 
-      
+      write.dta(data, "./data/ibu-aki-hf.dta") 
+
       

@@ -13,9 +13,8 @@ library(tibble)
 # Ibuprofen effect on AKI - evaluation of HTE by DM
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/ibu-aki-data.dta") 
-#TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
+data <- read_dta("./data/ibu-aki-data.dta") 
+
 
 # Clean data and and prep for balanceR, make DM a binary variable
 data <- data %>% 
@@ -366,8 +365,6 @@ data <- data %>%
 # Step 5: Ouctome model
   # Export to Stata
     # write to data folder
-    #write.dta("./Data/ibu-aki-dm.dta") 
-    # TEMPORARY
-    write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-dm.dta") 
+    write.dta(data, "./data/ibu-aki-dm.dta") 
     
     

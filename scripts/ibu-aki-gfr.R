@@ -13,9 +13,8 @@ library(tibble)
 # Ibuprofen effect on AKI - evaluation of HTE by baseline eGFR
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/ibu-aki-data.dta") 
-#TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta")
+data <- read_dta("./data/ibu-aki-data.dta") 
+
 
 # Clean data and and prep for balanceR, make age quintiles 
 data <- data %>% 
@@ -387,9 +386,7 @@ data <- cbind(data, indexGFR.sp) # add the spline columns to the data
       
 # Step 5: Export to Stata
       # write to data folder
-      #write.dta("./Data/ibu-aki-indexGFR") 
-      # TEMPORARY
-      write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-indexGFR.dta") 
+      write.dta(data, "./data/ibu-aki-indexGFR") 
       
  
   # Calculate values for splines at range of eGFRs for continuous eGFR analysis: 

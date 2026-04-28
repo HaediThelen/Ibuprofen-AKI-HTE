@@ -14,9 +14,8 @@ library(janitor)
 # Ibuprofen effect on AKI - low-risk subset
 # Step 0: Prep
 # Load in data
-#data <- read_dta("./data/ibu-aki-data.dta") 
-#TEMPORARY
-data <- read_dta("/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/ibu-aki-data.dta") 
+data <- read_dta("./data/ibu-aki-data.dta") 
+
 
 # Clean data and and prep for balanceR 
 data <- data %>% 
@@ -350,8 +349,5 @@ ess(data, "pain", "ATTwts")
 
 # Step 5: Export to Stata for analysis 
 # write to data folder
-#write.dta("./Data/ibu-aki-overall.dta") 
-# TEMPORARY
-#write.dta(data, "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data/low-risk-subset.dta")
-#write.dta(data, '/Users/haedi/Library/CloudStorage/Box-Box/Projects/Summer Rotation/Code/Data/low-risk-subset.dta')
+write.dta("data, ./data/low-risk-subset.dta") 
 
