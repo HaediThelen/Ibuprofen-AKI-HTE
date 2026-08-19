@@ -1,5 +1,5 @@
 * ==============================================================================
-* IBU Opioid AKI effect of IBU on AKI by Post-Op (Binary)
+* IBU Opioid AKI effect of IBU on AKI by Post-Op 
 * ==============================================================================
 //Base settings
 	clear
@@ -8,10 +8,9 @@
 
 ********************************************************************************
 ** Step 1: Load in Data
-** periOp_bin is the post-op binary variable to use
 ********************************************************************************	
 //open file
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data"
+	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
 	use ibu-aki-periOp.dta
 ************************************************************************	
 ** ATT
@@ -38,7 +37,7 @@
 				H1= "Risk Difference" I1="LB" J1= "UB"						///	
 				K1= "Difference in Differences" L1 = "LB" M1 = "UB"			///
 				N1 = "IRR" O1 = "LB" P1="UB"								///
-				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"					
+				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"	T1 = "Pval"					
 		putexcel A2 = "Not PostOp" A3 = "PostOp"
 	
 //Fit interaction model
@@ -46,9 +45,112 @@
 		matrix result = r(table)
 			putexcel N2 = matrix(result[1,4]) O2 = matrix(result[5,4]) P2 = matrix(result[6,4])
 			putexcel Q3 = matrix(result[1,8]) R3 = matrix(result[5,8]) S3 = matrix(result[6,8])
+			putexcel T3 = matrix(result[4,8])
 
 // Multiplicative Interaction
-	// Estimate the IRR for each level of DM
+	// Estimate the IRR for each level of periOp
+		lincom 1.pain + 2.periOp_bin#1.pain, eform
+			matrix result = r(estimate) , r(lb) , r(ub)
+				putexcel N3 = matrix(result[1,1]) O3 = matrix(result[1,2]) P3 = matrix(result[1,3])
+
+// Additive Interaction
+	// Effects of pain at each bmi level
+		margins r.pain@periOp_bin, predict(ir)
+			matrix result = r(table)
+				putexcel H2 = matrix(result[1,1]) I2 = matrix(result[5,1]) J2 = matrix(result[6,1])
+				putexcel H3 = matrix(result[1,2]) I3 = matrix(result[5,2]) J3 = matrix(result[6,2])
+
+	// IR in each of the 2 groups (for 2x2 table)
+		margins pain#periOp_bin, predict(ir)
+			matrix result = r(table)
+				putexcel B2 = matrix(result[1,1]) C2 = matrix(result[5,1]) D2 = matrix(result[6,1])
+				putexcel B3 = matrix(result[1,2]) C3 = matrix(result[5,2]) D3 = matrix(result[6,2])
+				putexcel E2 = matrix(result[1,3]) F2 = matrix(result[5,3]) G2 = matrix(result[6,3])
+				putexcel E3 = matrix(result[1,4]) F3 = matrix(result[5,4]) G3 = matrix(result[6,4])
+				
+	// Difference in difference estimate
+		margins pain#i.periOp_bin, predict(ir) contrast(effects)
+			matrix result = r(table)
+				putexcel K3 = matrix(result[1,1]) L3 = matrix(result[5,1]) M3 = matrix(result[6,1])
+	
+	putexcel close
+
+************************************************************************	
+** ATT Sensitivity Analysis - Opioid exposure in baseline period
+************************************************************************
+
+use ibu-aki-periOp-opBase.dta
+		
+// Set up excel sheet
+	putexcel set ../results/ibu-aki-periOp-bin-ATT-opBase.xlsx, replace
+		putexcel A1 = "Effect Modifier" B1 = "Oxycodone" C1 ="LB" D1= "UB" ///
+				E1 = "Ibuprofen" F1= "LB" G1 = "UB" 						///
+				H1= "Risk Difference" I1="LB" J1= "UB"						///	
+				K1= "Difference in Differences" L1 = "LB" M1 = "UB"			///
+				N1 = "IRR" O1 = "LB" P1="UB"								///
+				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"	T1 = "Pval"				
+		putexcel A2 = "Not PostOp" A3 = "PostOp"
+	
+//Fit interaction model
+	poisson kEver i.periOp_bin##i.pain [pweight = ATTwts_omeCat], exposure(pTime1000) irr
+		matrix result = r(table)
+			putexcel N2 = matrix(result[1,4]) O2 = matrix(result[5,4]) P2 = matrix(result[6,4])
+			putexcel Q3 = matrix(result[1,8]) R3 = matrix(result[5,8]) S3 = matrix(result[6,8])
+			putexcel T3 = matrix(result[4,8])
+
+// Multiplicative Interaction
+	// Estimate the IRR for each level of periOp
+		lincom 1.pain + 2.periOp_bin#1.pain, eform
+			matrix result = r(estimate) , r(lb) , r(ub)
+				putexcel N3 = matrix(result[1,1]) O3 = matrix(result[1,2]) P3 = matrix(result[1,3])
+
+// Additive Interaction
+	// Effects of pain at each bmi level
+		margins r.pain@periOp_bin, predict(ir)
+			matrix result = r(table)
+				putexcel H2 = matrix(result[1,1]) I2 = matrix(result[5,1]) J2 = matrix(result[6,1])
+				putexcel H3 = matrix(result[1,2]) I3 = matrix(result[5,2]) J3 = matrix(result[6,2])
+
+	// IR in each of the 2 groups (for 2x2 table)
+		margins pain#periOp_bin, predict(ir)
+			matrix result = r(table)
+				putexcel B2 = matrix(result[1,1]) C2 = matrix(result[5,1]) D2 = matrix(result[6,1])
+				putexcel B3 = matrix(result[1,2]) C3 = matrix(result[5,2]) D3 = matrix(result[6,2])
+				putexcel E2 = matrix(result[1,3]) F2 = matrix(result[5,3]) G2 = matrix(result[6,3])
+				putexcel E3 = matrix(result[1,4]) F3 = matrix(result[5,4]) G3 = matrix(result[6,4])
+				
+	// Difference in difference estimate
+		margins pain#i.periOp_bin, predict(ir) contrast(effects)
+			matrix result = r(table)
+				putexcel K3 = matrix(result[1,1]) L3 = matrix(result[5,1]) M3 = matrix(result[6,1])
+	
+	putexcel close
+
+************************************************************************	
+** ATT Sensitivity Analysis - exlcusion of non-oral opioids (IV/PCA/GTT/Patch) opioids
+************************************************************************
+
+use ibu-aki-periOp-opBasePOonly.dta
+		
+		// Set up excel sheet
+	putexcel set ../results/ibu-aki-periOp-bin-ATT-opBasePOonly.xlsx, replace
+		putexcel A1 = "Effect Modifier" B1 = "Oxycodone" C1 ="LB" D1= "UB" ///
+				E1 = "Ibuprofen" F1= "LB" G1 = "UB" 						///
+				H1= "Risk Difference" I1="LB" J1= "UB"						///	
+				K1= "Difference in Differences" L1 = "LB" M1 = "UB"			///
+				N1 = "IRR" O1 = "LB" P1="UB"								///
+				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"	T1 = "Pval"				
+		putexcel A2 = "Not PostOp" A3 = "PostOp"
+	
+//Fit interaction model
+	poisson kEver i.periOp_bin##i.pain [pweight = ATTwts_opBasePOonly], exposure(pTime1000) irr
+		matrix result = r(table)
+			putexcel N2 = matrix(result[1,4]) O2 = matrix(result[5,4]) P2 = matrix(result[6,4])
+			putexcel Q3 = matrix(result[1,8]) R3 = matrix(result[5,8]) S3 = matrix(result[6,8])
+			putexcel T3 = matrix(result[4,8])
+
+// Multiplicative Interaction
+	// Estimate the IRR for each level of periOp
 		lincom 1.pain + 2.periOp_bin#1.pain, eform
 			matrix result = r(estimate) , r(lb) , r(ub)
 				putexcel N3 = matrix(result[1,1]) O3 = matrix(result[1,2]) P3 = matrix(result[1,3])

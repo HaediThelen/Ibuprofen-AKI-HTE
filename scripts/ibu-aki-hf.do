@@ -8,10 +8,8 @@
 
 ********************************************************************************
 ** Step 1: Load in Data
-** chf.cat is the chf  categorical variable to use
 ********************************************************************************	
-//open file
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Data/NSAID-AKI/data"
+	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
 	use ibu-aki-hf.dta
 	
 ************************************************************************	
@@ -35,17 +33,18 @@
 				H1= "Rate Difference" I1="LB" J1= "UB"						///	
 				K1= "Difference in Differences" L1 = "LB" M1 = "UB"			///
 				N1 = "IRR" O1 = "LB" P1="UB"								///
-				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"					
-		putexcel A2 = "No CHF" A3 = "CHF"
+				Q1 = "Ratio of IRR" R1 = "LB" S1= "UB"	T1 = "Pval"		 			
+		putexcel A2 = "No HF" A3 = "HF"
 	
 //Fit interaction model
 	poisson kEver i.chf_cat##i.pain [pweight = ATTwts], exposure(pTime1000) irr
 		matrix result = r(table)
 			putexcel N2 = matrix(result[1,4]) O2 = matrix(result[5,4]) P2 = matrix(result[6,4])
 			putexcel Q3 = matrix(result[1,8]) R3 = matrix(result[5,8]) S3 = matrix(result[6,8])
+			putexcel T3 = matrix(result[4,8])
 
 // Multiplicative Interaction
-	// Estimate the IRR for each level of CHF
+	// Estimate the IRR for each level of HF
 		lincom 1.pain + 2.chf_cat#1.pain, eform
 			matrix result = r(estimate) , r(lb) , r(ub)
 				putexcel N3 = matrix(result[1,1]) O3 = matrix(result[1,2]) P3 = matrix(result[1,3])
@@ -72,4 +71,3 @@
 				putexcel K3 = matrix(result[1,1]) L3 = matrix(result[5,1]) M3 = matrix(result[6,1])
 	
 	putexcel close
-

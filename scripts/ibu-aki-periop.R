@@ -1,14 +1,17 @@
 library(foreign)
 library(balancer)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(sandwich)
 library(splines)
 library(haven)
-library(Hmisc) 
+library(Hmisc)
 library(tableone)
 library(survey)
 library(tibble)
+library(janitor)
+library(cobalt)
 
 # Ibuprofen effect on AKI - evaluation of HTE by Periop
 # Step 0: Prep
@@ -18,8 +21,6 @@ data <- read_dta("./data/ibu-aki-data.dta")
 
 # Clean data and and prep for balanceR, make periop a binary variable
 data <- data %>% 
-  filter(pain !=2) %>% # drop patients exposed to both IBU and Opioids
-  filter(bmi > 14 & bmi <70) %>%
   mutate(across(where(is.numeric), as.numeric)) %>%
   mutate(across(where(~ all(. %in% c(0, 1))), as.integer)) %>%
   mutate(periOp.bin = if_else(periOp ==0, 0, 1)) %>%
@@ -68,141 +69,8 @@ data %>% count(periOp, periOp.bin)
   # For primary analysis it will be ATT 
   
   # 2. Check for positivity/overlap
-  # Prep and label variables for table  
-  # Calculate SMDs for tx groups  
-  #prep for SMD table
-  data.smdtab <- data %>%
-    mutate_if(is.integer, as.factor) %>% # need to label each level
-    mutate(sex = factor(sex,labels=c("Male","Female"))) %>% # finish labels
-    mutate(race.white = factor(race.white, labels=c("Not White","White"))) %>%
-    mutate(race.black = factor(race.black, labels=c("Not Black","Black"))) %>%
-    mutate(race.other = factor(race.other, labels=c("Not Other/Unknown","Other/Unknown"))) %>%
-    mutate(admType = factor(admType, labels = c("Medicine", "Surgery"))) %>%
-    mutate(center.hup = factor(center.hup, labels = c("Not HUP", "HUP"))) %>%
-    mutate(center.presb = factor(center.presb, labels = c("Not Presbyterian", "Presbyterian"))) %>%
-    mutate(center.pa = factor(center.pa, labels = c("Not Pennsylvania Hosptial", "Pennsylvania Hosptial"))) %>%
-    mutate(presentation.ed= factor(presentation.ed, labels = c("Not ED", "ED"))) %>%
-    mutate(presentation.icu= factor(presentation.icu, labels = c("Not ICU", "ICU"))) %>%
-    mutate(presentation.or= factor(presentation.or, labels = c("Not OR", "OR"))) %>%
-    mutate(presentation.floor= factor(presentation.floor, labels = c("Not Floor", "Floor"))) %>%
-    mutate(presentation.other= factor(presentation.other, labels = c("Not Other", "Other"))) %>%
-    mutate(icuCurrent= factor(icuCurrent, labels = c("No", "Yes"))) %>%
-    mutate(periOp.no = factor(periOp.no, labels = c("Post Op", "Not post-op"))) %>%
-    mutate(periOp.0 = factor(periOp.0, labels = c("Not POD 0", "POD 0"))) %>%
-    mutate(periOp.1 = factor(periOp.1, labels = c("Not POD 1", "POD 1"))) %>%
-    mutate(periOp.2 = factor(periOp.2, labels = c("Not POD 2", "POD 2"))) %>%
-    mutate(periOp.3 = factor(periOp.3, labels = c("Not POD 3", "POD 3"))) %>%
-    mutate(baseVentCurrent = factor(baseVentCurrent, labels = c("No", "Yes"))) %>%
-    mutate(baseVentEver = factor(baseVentEver, labels = c("No", "Yes"))) %>%
-    mutate(chf = factor(chf, labels = c("No", "Yes"))) %>%
-    mutate(mif = factor(mif, labels = c("No", "Yes"))) %>%
-    mutate(arry = factor(arry, labels = c("No", "Yes"))) %>%
-    mutate(afib = factor(afib, labels = c("No", "Yes"))) %>%
-    mutate(valve = factor(valve,  labels = c("No", "Yes"))) %>%
-    mutate(cva = factor(cva, labels = c("No", "Yes"))) %>%
-    mutate(pvd = factor(pvd, labels = c("No", "Yes"))) %>%
-    mutate(pCirc = factor(pCirc, labels = c("No", "Yes"))) %>%
-    mutate(cpd = factor(cpd, labels = c("No", "Yes"))) %>%
-    mutate(liver = factor(liver, labels = c("No", "Yes"))) %>%
-    mutate(dm.no = factor(dm.no, labels = c("No", "Yes"))) %>%
-    mutate(dm.noncomp = factor(dm.noncomp, labels = c("No", "Yes"))) %>%
-    mutate(dm.comp = factor(dm.comp, labels = c("No", "Yes"))) %>%
-    mutate(ckd = factor(ckd, labels = c("No", "Yes"))) %>%
-    mutate(wtLoss = factor(wtLoss, labels = c("No", "Yes"))) %>%
-    mutate(fluid = factor(fluid, labels = c("No", "Yes"))) %>%
-    mutate(cancer.no = factor(cancer.no, labels = c("No", "Yes"))) %>%
-    mutate(cancer.noncomp = factor(cancer.noncomp, labels = c("No", "Yes"))) %>%
-    mutate(cancer.metastatic = factor(cancer.metastatic, labels = c("No", "Yes"))) %>%
-    mutate(hiv= factor(hiv, labels = c("No", "Yes"))) %>%
-    mutate(preAkiStatus = factor(preAkiStatus, labels = c("No", "Yes"))) %>%
-    mutate(metopBase = factor(metopBase, labels = c("No", "Yes"))) %>%
-    mutate(abBlocker = factor(abBlocker, labels = c("No", "Yes"))) %>%
-    mutate(hctzBase = factor(hctzBase, labels = c("No", "Yes"))) %>%
-    mutate(loopBase = factor(loopBase, labels = c("No", "Yes"))) %>%
-    mutate(htnOther = factor(htnOther, labels = c("No", "Yes"))) %>%
-    mutate(sup.no = factor(sup.no, labels = c("No", "Yes"))) %>%
-    mutate(sup.h2ra = factor(sup.h2ra, labels = c("No", "Yes"))) %>%
-    mutate(sup.ppi = factor(sup.ppi, labels = c("No", "Yes"))) %>%
-    mutate(gramNegBroad = factor(gramNegBroad, labels = c("No", "Yes"))) %>%
-    mutate(gramNegNarrow = factor(gramNegNarrow, labels = c("No", "Yes"))) %>%
-    mutate(vancoBase = factor(vancoBase, labels = c("No", "Yes"))) %>%
-    mutate(bactrimBase = factor(bactrimBase, labels = c("No", "Yes"))) %>%
-    mutate(abxNTX = factor(abxNTX, labels = c("No", "Yes"))) %>%
-    mutate(ntxOther = factor(ntxOther, labels = c("No", "Yes"))) %>%
-    mutate(pressBase = factor(pressBase, labels = c("No", "Yes"))) %>%
-    mutate(pain = factor(pain, labels = c("Oxycodone", "Ibuprofen")))
-  
-  # Labels for the Table
-  label(data.smdtab$sex)  <- "Sex" 
-  label(data.smdtab$age) <- "Age"
-  label(data.smdtab$race.white) <- "Race - White"
-  label(data.smdtab$race.black) <- "Race - Black"
-  label(data.smdtab$race.other) <- "Race - Other/Unknown"
-  label(data.smdtab$admType) <- "Admission Type"
-  label(data.smdtab$center.hup) <- "Hospital - HUP"
-  label(data.smdtab$center.presb) <- "Hospital - Presbyterian"
-  label(data.smdtab$center.pa) <- "Hospital - Pennsylvania"
-  label(data.smdtab$presentation.ed) <- "Presentation - ED"
-  label(data.smdtab$presentation.icu) <- "Presentation - ICU"
-  label(data.smdtab$presentation.or) <- "Presentation - OR"
-  label(data.smdtab$presentation.floor) <- "Presentation - Floor"
-  label(data.smdtab$presentation.other) <- "Presentation - Other"
-  label(data.smdtab$priorLos) <- "Prior Length of Stay"
-  label(data.smdtab$icuCurrent) <- "ICU Status"
-  label(data.smdtab$periOp.no) <- " Not Peri-Op "
-  label(data.smdtab$periOp.0) <- "POD 0"
-  label(data.smdtab$periOp.1) <- "POD 1"
-  label(data.smdtab$periOp.2) <- "POD 2"
-  label(data.smdtab$periOp.3) <- "POD 3"
-  label(data.smdtab$baseVentCurrent) <- "Ventilator Status at Baseline"
-  label(data.smdtab$baseVentEver) <- "Ventilator Status"
-  label(data.smdtab$chf) <- "Heart Failure"
-  label(data.smdtab$mif) <- "Myocardial Infarction"
-  label(data.smdtab$arry) <- "Arrhythmia"
-  label(data.smdtab$afib) <- "Atrial Fibrilation"
-  label(data.smdtab$valve) <- "Valvular Disease"
-  label(data.smdtab$cva) <- "Stroke"
-  label(data.smdtab$pvd) <- "Peripheral Vascular Disease"
-  label(data.smdtab$pCirc) <- "Pulmonary Circulation Disorder"
-  label(data.smdtab$cpd) <- "Chronic Pulmonary Disease"
-  label(data.smdtab$liver) <- "Liver Disease"
-  label(data.smdtab$dm.no) <- "Diabetes Mellitus - None"
-  label(data.smdtab$dm.noncomp) <- "Diabetes Mellitus - Non-complicated"
-  label(data.smdtab$dm.comp) <- "Diabetes Mellitus - Complicated"
-  label(data.smdtab$ckd) <- "Chronic Kidney Disease"
-  label(data.smdtab$wtLoss) <- "Weight Loss"
-  label(data.smdtab$fluid) <- "Fluid and Electrolyte Disorder"
-  label(data.smdtab$cancer.no) <- "Cancer - None"
-  label(data.smdtab$cancer.noncomp) <- "Cancer - Non-complicated"
-  label(data.smdtab$cancer.metastatic) <- "Cancer - Metastatic"
-  label(data.smdtab$hiv) <- "HIV"
-  label(data.smdtab$indexGFR) <- "GFR ml/min per 1.73m^2 "
-  label(data.smdtab$preAkiStatus) <- "Prior AKI"
-  label(data.smdtab$wbcBase) <- "WBC, x10^8 cells/dL"
-  label(data.smdtab$hgbBase) <- "Hemoglobin, g/dL"
-  label(data.smdtab$platBase) <- "Platelets, x10^11 cells/L"
-  label(data.smdtab$labclBase) <- "Chloride, mEq/L"
-  label(data.smdtab$labkBase) <- "Potassium, mEq/L"
-  label(data.smdtab$rasBase) <- "RAS Inhibitor"
-  label(data.smdtab$metopBase) <- "Metoprolol"
-  label(data.smdtab$abBlocker) <- "Combined Alpha and Beta Blocker"
-  label(data.smdtab$hctzBase) <- "Hydrochlorothiazide"
-  label(data.smdtab$loopBase) <- "Loop Diuretics"
-  label(data.smdtab$htnOther) <- "Other Antihypertensives"
-  label(data.smdtab$sup.no) <- "Acid Supressants - None"
-  label(data.smdtab$sup.h2ra) <- "Acid Supressants - H2RA"
-  label(data.smdtab$sup.ppi) <- "Acid Supressants - PPI"
-  label(data.smdtab$gramNegBroad) <- "Broad Spectrum Antibiotics"
-  label(data.smdtab$gramNegNarrow) <- "Narrow Spectrum Antibiotics"
-  label(data.smdtab$vancoBase) <- "Vancomycin"
-  label(data.smdtab$bactrimBase) <- "Bactrim"
-  label(data.smdtab$abxNTX) <- "Other Nephrotoxic Antibiotics"
-  label(data.smdtab$ntxOther) <- "Other Nephrotoxins"
-  label(data.smdtab$pressBase) <- "Vasopressors"
-  label(data.smdtab$bmi) <- "Body Mass Index"
-  
   # Choose all covs to evaluate SMDs
-  covs <- c("age", "sex", "race.white", "race.black", "race.other", "admType", 
+  covs <- c("age", "sex", "race.black","race.white", "race.other", "admType", 
             "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
             "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
             "baseVentCurrent", 
@@ -219,7 +87,7 @@ data %>% count(periOp, periOp.bin)
   periOp.values <- 0:1
   source("./functions/overlap-eval.R")
   smd.tab.list <- lapply(periOp.values, function(periOp.values) {
-    subset <- data.smdtab %>% filter(periOp.bin == periOp.values)
+    subset <- data %>% filter(periOp.bin == periOp.values)
     smd.table(subset, covs)
   })
   View(smd.tab.list[[1]])
@@ -250,7 +118,7 @@ data %>% count(periOp, periOp.bin)
     print(num.summary.list[[2]])
     
 # Step 3: Estimate Weights
-  covs <- c(colnames(age.sp), "sex", "race.white", "race.black", "race.other", "admType", 
+  covs.bal <- c(colnames(age.sp), "sex", "race.white", "race.black", "race.other", "admType", 
             "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
             "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
             "baseVentCurrent", 
@@ -264,14 +132,14 @@ data %>% count(periOp, periOp.bin)
             "abxNTX", "ntxOther", "pressBase", "bmi", "-1")
   
   # More Prep for BalanceR
-    basis <- reformulate(covs) # prepare a formula object                       
+    basis <- reformulate(covs.bal) # prepare a formula object                       
     X <- scale(model.matrix(as.formula(basis), data)) # prepare a scaled matrix 
     # scaling is needed to calculate the weights, since they target a mean of 0
     trt <- data$pain
     n <- nrow(data)
     
     data.ctrl <- data %>% filter(pain==0)
-    lambda.reg <- lm(reformulate(covs, response = "kEver"), data=data.ctrl)
+    lambda.reg <- lm(reformulate(covs.bal, response = "kEver"), data=data.ctrl)
     var(lambda.reg$resid)
     
     # Identify Effect Modifier  
@@ -292,24 +160,10 @@ data %>% count(periOp, periOp.bin)
     sd(data$ATTwts)
    
 # Step 4: assess balance, weights, and ESS
-    covs <- c("age", "sex", "race.white", "race.black", "race.other", "admType", 
-              "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
-              "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
-              "baseVentCurrent", 
-              "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
-              "cva", "pvd", "pCirc", "cpd", "liver",  "dm.no", "dm.noncomp", "dm.comp","ckd", 
-              "wtLoss", "fluid", "cancer.no", "cancer.noncomp", "cancer.metastatic",
-              "hiv", "indexGFR", "preAkiStatus", "wbcBase", "hgbBase", "platBase", "labclBase",
-              "labkBase", "rasBase", "metopBase", "abBlocker", "hctzBase", "hydralazineBase", "loopBase",
-              "htnOther", "sup.no","sup.h2ra", "sup.ppi", "gramNegBroad", "gramNegNarrow", 
-              "vancoBase", "bactrimBase",
-              "abxNTX", "ntxOther", "pressBase", "bmi")
-    
   # SMD Plots and Total Bias Reduction 
     detach(package:Hmisc, unload=TRUE)
     source("./functions/balance-plots.R")
   # ATT (Balwts)
-    bal.plots.ATT <- bal.plots(data, "ATTwts", "periOp.bin", 'pain', covs) 
     bal.plots.ATT_clean <- bal.plot.clean.bin(data = data, weights = "ATTwts", strata = "periOp.bin", 
                                           treatment = "pain", covs = covs, subset = TRUE, main.title = "Balance Plot Peri-Operative")
     # Save plots
@@ -368,5 +222,196 @@ data %>% count(periOp, periOp.bin)
   # Export to Stata
     # write to data folder
     write.dta(data, "./data/ibu-aki-periOp.dta") 
+
+# 6. Sensitivity Analysis - IV Opioid exposure in baseline period
+# include IV opioid exposure during the baseline period in the balance weight model to adjust for potential confounding by indication.
+    
+# 6a. Make summary table of IV opioid exposure in baseline period by pain status and icu status
+    cat.vars <- c("opBase", "h_Base", "m_Base", "f_Base", "opBasePO", "opBasePatch", "opBaseIV",
+                  "opBasePCA", "opBaseGTT")
+    cont.vars <- c("omeBaseTotal")
+    
+    source("./functions/baseOp-summary.R")
+    data.baseline.opioid.tab.periop <- make_baseline_opioid_table(data %>% filter(periOp.bin == 1), cat.vars, cont.vars, ome.var = "omeBaseTotal")
+    data.baseline.opioid.tab.periop
+
+    data.baseline.opioid.tab.notperiop <- make_baseline_opioid_table(data %>% filter(periOp.bin == 0), cat.vars, cont.vars, ome.var = "omeBaseTotal")
+    data.baseline.opioid.tab.notperiop
+
+    # 6b. Estimate balancing weights in subgroups, including omeCat
+    #omeCat is a categorical variable with 0 =  were omeBaseTotal was 0 indicating no opioid
+    # 1 =  1-25th percentile of non-zero omeBaseTotal
+    # 2 = 25-50th percentile of non-zero omeBaseTotal 
+    # 3 = 50-75th percentile of non-zero omeBaseTotal
+    # 4 = 75-100th percentile ofnon-zero omeBaseTotal
+    
+    # Make dummy variable of omeCat
+    data <- data %>% 
+      mutate(omeCat.0 = if_else(omeCat == 0, 1, 0),  #make dummy variables
+             omeCat.1 = if_else(omeCat == 1, 1, 0),
+             omeCat.2 = if_else(omeCat == 2, 1, 0),
+             omeCat.3 = if_else(omeCat == 3, 1, 0),
+             omeCat.4 = if_else(omeCat == 4, 1, 0))
+    
+    covs.bal.omeCat <- c(colnames(age.sp), "sex", "race.white", "race.black", "race.other", "admType", 
+                         "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
+                         "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
+                         "baseVentCurrent", 
+                         "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
+                         "cva", "pvd", "pCirc", "cpd", "liver", "dm.no", "dm.noncomp", "dm.comp", "ckd", 
+                         "wtLoss", "fluid", "cancer.no", "cancer.noncomp", "cancer.metastatic",
+                         "hiv", colnames(indexGFR.sp), "preAkiStatus", "wbcBase", "hgbBase", "platBase", "labclBase",
+                         "labkBase","rasBase", "metopBase", "abBlocker", "hctzBase", "hydralazineBase", "loopBase",
+                         "htnOther", "sup.no","sup.h2ra", "sup.ppi", "gramNegBroad", "gramNegNarrow", 
+                         "vancoBase", "bactrimBase",
+                         "abxNTX", "ntxOther", "pressBase", "bmi", "omeCat.0","omeCat.1",
+                         "omeCat.2", "omeCat.3", "omeCat.4", "-1")
+    
+    # More Prep for BalanceR
+    basis <- reformulate(covs.bal.omeCat) # prepare a formula object                       
+    X <- scale(model.matrix(as.formula(basis), data)) # prepare a scaled matrix 
+    # scaling is needed to calculate the weights, since they target a mean of 0
+    trt <- data$pain
+    n <- nrow(data)
+    
+    # Identify Effect Modifier
+    table(data$periOp.bin)
+    Z <- data$periOp.bin # a factor
+    
+    # Balance Weights ATT
+    # Calculate
+    out.pain <- multilevel_qp(X, trt, Z, lambda = 0.05, 
+                              lowlim = 0, uplim = 1,  verbose= TRUE, 
+                              exact_global = TRUE, scale_sample_size = FALSE)
+    
+    # Process 
+    data$ATTwts.omeCat <- pmax(out.pain$weights, 0) 
+    summary(data$ATTwts.omeCat)
+    data$ATTwts.omeCat[data$pain == 1] <- 1
+    summary(data$ATTwts.omeCat)
+    sd(data$ATTwts.omeCat)
+    
+    # Evaluate Balance
+    # Restrict to ICU and Non-ICU for table 1 style-summary of omeCat
+    data.nonperiOp <- data %>% filter(periOp.bin==0)
+    data.periOp <- data %>% filter(periOp.bin==1)
+    
+    source("./functions/table1.R")
+    tab.1.nonperiOp.omeCat <- table.1.omeCat(data.nonperiOp, "ATTwts.omeCat", c("omeCat.0","omeCat.1",
+                                                                                "omeCat.2", "omeCat.3", "omeCat.4"))
+    tab.1.nonperiOp.omeCat
+
+    tab.1.periOp.omeCat <- table.1.omeCat(data.periOp, "ATTwts.omeCat", c("omeCat.0","omeCat.1",
+                                                                          "omeCat.2", "omeCat.3", "omeCat.4"))
+    tab.1.periOp.omeCat
+
+    covs_omeCat <- c("age", "sex", "race.white", "race.black", "race.other", "admType", 
+                     "center.hup", "center.presb", "center.pa", "presentation.ed", "presentation.icu",
+                     "presentation.or", "presentation.floor", "presentation.other", "priorLos", "icuCurrent",
+                     "baseVentCurrent", 
+                     "baseVentEver", "chf", "mif", "arry", "afib", "valve", 
+                     "cva", "pvd", "pCirc", "cpd", "liver", "dm.no", "dm.noncomp", "dm.comp", "ckd", 
+                     "wtLoss", "fluid", "cancer.no", "cancer.noncomp", "cancer.metastatic",
+                     "hiv", "indexGFR", "preAkiStatus", "wbcBase", "hgbBase", "platBase", "labclBase",
+                     "labkBase", "rasBase","metopBase", "abBlocker", "hctzBase", "hydralazineBase", "loopBase",
+                     "htnOther", "sup.no","sup.h2ra", "sup.ppi", "gramNegBroad", "gramNegNarrow", 
+                     "vancoBase", "bactrimBase", "abxNTX", "ntxOther", "pressBase", "bmi",
+                     "omeCat.0","omeCat.1", "omeCat.2", "omeCat.3", "omeCat.4")
+    
+    long.names <- c("Age", "Sex (Female)", "Race - White", "Race - Black", "Race - Other", "Admisison Type", 
+                    "Center - HUP", "Center - Presbyterian", "Center - Pennsylvania Hospital", "Presentation - ED", "Presentation ICU",
+                    "Presentation - OR", "Presentation - Floor", "Presentation - Other", "Prior LOS", "ICU Status",
+                    "Ventilator Status", 
+                    "Prior Ventilator", "Heart Failure", "Myocardial Infarction", "Arrhythmia", "Atrial Fibrillation", "Valvular Diseas", 
+                    "Stroke", "Peripheral Vascular Disease", "Pulmonary Circulation Disorder", "Chronic Pulmonary Disease", "Liver Disease", 
+                    "Diabetes Mellitus - None", "Diabetes Mellitus - Non-complicated", "Diabetes Mellitus - Complicated", "Chronic Kidney Disease", 
+                    "Weight Loss", "Fluid and Electrolyte Disorder", "Cancer - None", "Cancer - Non-complicated", "Cancer - Metastatic",
+                    "HIV", "eGFR", "Prior AKI", "WBC, x10^8 cells/dL", "Hemoglobin, g/dL", "Platelets, x10^11 cells/L", "Chloride, mEq/L",
+                    "Potassium, mEq/L","RAS Inhibitor", "Metoprolol", "Combined Alpha and Beta Blocker", "Hydrochlorothiazide", "Hydralazine", "Loop Diuretics",
+                    "Other Antihypertensives", "Acid Suppressants - None","Acid Suppressants - H2RA", "Acid Suppressants - PPI", "Broad Spectrum Antibiotics", "Narrow Spectrum Antibiotics", 
+                    "Vancomycin", "Bactrim", "Other Nephrotoxic Antibiotics", "Other Nephrotoxins", "Vasopressors", "BMI",
+                    "Baseline Opioid - None","Baseline Opioid - Q1 OME", "Baseline Opioid - Q2 OME", "Baseline Opioid - Q3 OME", "Baseline Opioid - Q4 OME")
+    
+    detach(package:Hmisc, unload=TRUE)
+    bal.plots.ATT.clean <- bal.plot.clean.bin(data = data, weights = "ATTwts.omeCat", strata = "periOp.bin", 
+                                              treatment = "pain", covs = covs_omeCat, subset = TRUE, main.title = "Balance Plot Postoperative Status", long.names = long.names)
+    # Save plots
+    for (i in seq_along(bal.plots.ATT.clean)) {
+      plot_i <- bal.plots.ATT.clean[[i]]
+      file_name <- paste0("./results/periOp/balplots/balance-plot-periOp-", i, "-baseOP.jpeg")
+      ggsave(filename = file_name, plot = plot_i, device = "jpeg", 
+             width = 7, height = 9, units = "in", dpi = 300)
+    }
+    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by Postoperative Status", strata = "periOp.bin")
+    composite.plot
+    
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-baseOP.jpeg", plot = composite.plot, device = "jpeg", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-baseOP.pdf", plot = composite.plot, device = "pdf", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    
+    write.dta(data, "./data/ibu-aki-periOp-opBase.dta")
+    
+# 7.Sensitivity Analysis - ICU subgroup analysis restricted to patients who received only oral exposures 
+#7a. restrict to patietns who received oral opioids and NSAIDs in the baseline period and estimate balance weights
+    data.opBasePOonly <- data %>% filter(opBaseIV == 0 & opBasePCA == 0, opBaseGTT == 0, opBasePatch ==0)
+    
+  # Breakdown of treatment and periOp status in those who did not receive non-PO analgesics. 
+    data.opBasePOonly %>% group_by(pain, periOp.bin) %>% summarise(n=n())
+
+  # Estimate Weights
+  # Prep for BalanceR
+    basis <- reformulate(covs.bal) # prepare a formula object                       
+    X <- scale(model.matrix(as.formula(basis), data.opBasePOonly)) # prepare a scaled matrix 
+    # scaling is needed to calculate the weights, since they target a mean of 0
+    trt <- data.opBasePOonly$pain
+    n <- nrow(data.opBasePOonly)
+    
+  # Identify Effect Modifier
+    table(data.opBasePOonly$periOp.bin)
+    Z <- data.opBasePOonly$periOp.bin # a factor
+    
+  # Balance Weights ATT
+    out.pain <- multilevel_qp(X, trt, Z, lambda = 0.05, 
+                              lowlim = 0, uplim = 1,  verbose= TRUE, 
+                              exact_global = TRUE, scale_sample_size = FALSE)
+    
+  # Process 
+    data.opBasePOonly$ATTwts.opBasePOonly <- pmax(out.pain$weights, 0) 
+    summary(data.opBasePOonly$ATTwts.opBasePOonly)
+    data.opBasePOonly$ATTwts.opBasePOonly[data.opBasePOonly$pain == 1] <- 1
+    summary(data.opBasePOonly$ATTwts.opBasePOonly)
+    sd(data.opBasePOonly$ATTwts.opBasePOonly)
+    
+  # 7b: assess balance, weights, and ESS
+    # Table 1 for ATT overall
+    detach(package:Hmisc, unload=TRUE)
+    source("./functions/balance-plots.R")
+    bal.plots.ATT.clean <- bal.plot.clean.bin(data = data.opBasePOonly, weights = "ATTwts.opBasePOonly", strata = "periOp.bin", 
+                                              treatment = "pain", covs = covs, subset = TRUE, main.title = "Balance Plot by Perioperative Status in \nOral-Analgesics-Only Cohort")
+    # Save plots
+    for (i in seq_along(bal.plots.ATT.clean)) {
+      plot_i <- bal.plots.ATT.clean[[i]]
+      file_name <- paste0("./results/periOp/balplots/balance_plot_periOp_balplots.opBasePOonly_", i, ".jpeg")
+      ggsave(filename = file_name, plot = plot_i, device = "jpeg", 
+             width = 7, height = 9, units = "in", dpi = 300)
+    }
+    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by Postoperative Status in \nOral-Analgesics-Only Cohort", strata = "periOp.bin")
+    composite.plot
+    
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-opBasePOonly.jpeg", plot = composite.plot, device = "jpeg", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-opBasePOonly.pdf", plot = composite.plot, device = "pdf", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    
+  # ESS
+  # Effective Sample Size ATT
+    source("./functions/ess-function.R")
+    ess(data.opBasePOonly, "pain", "ATTwts.opBasePOonly")
+    
+# 7c. Export to Stata
+# write to data folder
+    write.dta(data.opBasePOonly, "./data/ibu-aki-periOp-opBasePOonly.dta")
+    
     
     

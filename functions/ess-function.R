@@ -18,5 +18,26 @@ ess <- function(data, trt, wts) {
 }
 
 
+ess_mult <- function(data, trt, wts) {
+  # for each value of trt, calculate the effective sample size
+  # There coudl be 1 or more treatment groups, so we will loop through each unique value of trt
+  trt_values <- unique(data[[trt]])
+  ess_list <- list()
+  for (i in trt_values) {
+    data.trt <- data %>% filter(.data[[trt]] == i)
+    n.trt <-(sum(data.trt[[wts]])^2)/ (sum(data.trt[[wts]]^2))
+    ess_list[[as.character(i)]] <- n.trt
+  }
+  #make result dataframe
+  result <- data.frame(
+    "Treatment" = names(ess_list),
+    "Effective Sample Size" = unlist(ess_list)
+  )
+  # Add a total row
+  result <- rbind(result, data.frame("Treatment" = "Total", "Effective Sample Size" = sum(unlist(ess_list)))
+  )
+  rownames(result) <- NULL
+  return(result)
+}
 
 
