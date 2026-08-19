@@ -211,13 +211,13 @@ library(cobalt)
 
 # Step 6: Supplemental Analysis: Serum Creatinine over follow-up
     # Make a table showing median and IQR range of serum creatinine measurements per day over followup, stratified by treatment group
-  write_clip(data %>%  group_by(pain) %>%
+  data %>%  group_by(pain) %>%
     summarise(
       n = n(),
       creatinine = paste0(
         round(median(creMon, na.rm = TRUE), 1), " (",
         round(quantile(creMon, 0.25, na.rm = TRUE), 2), "-",
-        round(quantile(creMon, 0.75, na.rm = TRUE), 2), ")")))
+        round(quantile(creMon, 0.75, na.rm = TRUE), 2), ")"))
 
 # Step 7: Evaluate duration of follow up by treatment group with extended 5 day follow up window
    data %>%
@@ -419,7 +419,6 @@ data <- data %>%
   
   # Assess balance, weights, and ESS
   # SMD Plots and Total Bias Reduction 
-  detach(package:Hmisc, unload=TRUE)
   source("./functions/balance-plots.R")
   bal.plots.ATT.clean <- bal.plot.clean(data = data.opBasePOonly, weights = "ATTwts.opBasePOonly",
                                             treatment = "pain", covs = covs, subset = FALSE, main.title = "Balance Plot: Oral-Analgesics-Only Cohort")

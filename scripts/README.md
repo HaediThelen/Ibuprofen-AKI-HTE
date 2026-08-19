@@ -4,7 +4,7 @@ These scripts reproduce the analyses presented in the manuscript. Run the script
 
 ## 1. Download the Data
 
-Download the study data from **[Zenodo link]** and place the downloaded files in the repository's `data/` folder.
+Download the study data from [10.5281/zenodo.22014670](10.5281/zenodo.22014670) and place the downloaded files in the repository's `data/` folder.
 
 ## 2. Run the Analysis Scripts
 

@@ -6,4 +6,4 @@ This repository accompanies a study examining the association between ibuprofen 
 Manuscript Status:
 This work is currently under review for publication.
 
-The associated dataset is available for download at: 
+The associated dataset is available for download at: [10.5281/zenodo.22014670](10.5281/zenodo.22014670)
