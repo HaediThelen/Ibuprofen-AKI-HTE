@@ -9,8 +9,8 @@
 ********************************************************************************
 ** Step 1: Load in Data
 ********************************************************************************	
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-hf.dta
+//open file from data directory
+	use ../data/ibu-aki-hf.dta
 	
 ************************************************************************	
 ** ATT

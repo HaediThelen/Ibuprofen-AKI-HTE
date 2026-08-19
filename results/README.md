@@ -1,2 +1,2 @@
-# Ibuprofen-AKI-HTE
-Results will be stored here but not tracked by git. 
+Results will be stored here. 
+This folder is not tracked by git. 

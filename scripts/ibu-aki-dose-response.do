@@ -9,8 +9,8 @@
 ********************************************************************************
 ** Step 1: Load file with balance weights
 ********************************************************************************
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-dose-response.dta
+//open file from data directory
+	use ../data/ibu-aki-dose-response.dta
 	
 ************************************************************************	
 ** ADose Response - ATE

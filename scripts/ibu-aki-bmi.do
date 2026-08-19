@@ -1,6 +1,5 @@
 * ==============================================================================
 * IBU Opioid AKI effect of IBU on AKI by BMI continuous ixn
-* Summer Rotation 8/17/23 &	categorical class		
 * ==============================================================================
 //Base settings
 	clear
@@ -11,8 +10,7 @@
 ** Step 1: Load in Data
 ********************************************************************************	
 //open file ibu-aki-age.dta from data directory
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-bmi.dta
+	use ..data/ibu-aki-bmi.dta
 					
 ************************************************************************	
 ** Step 3: calculate effect modification using bmi (Continuous) with splines used

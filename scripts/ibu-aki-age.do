@@ -10,8 +10,7 @@
 ** Step 1: Load in Data
 ********************************************************************************	
 //open file ibu-aki-age.dta from data directory
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-age.dta	
+	use ../data/ibu-aki-age.dta	
 					
 ************************************************************************	
 ** Step 2: calculate effect modification using age (Continuous) with splines used

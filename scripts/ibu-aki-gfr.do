@@ -10,9 +10,8 @@
 ********************************************************************************
 ** Step 1: Load in Data
 ********************************************************************************	
-//open file ibu-aki-indexGFR.dta from data directory
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-indexGFR.dta
+//open file from data directory
+	use ../data/ibu-aki-indexGFR.dta
 
 ************************************************************************	
 ** Step 3: calculate effect modification using eGFR (Continuous) with splines

@@ -9,9 +9,8 @@
 ********************************************************************************
 **  Load file with balance weights
 ********************************************************************************
-//open file ibu-aki-overall.dta from data directory
-	cd "/Users/haedi/Library/CloudStorage/Box-Box/Repos/Ibuprofen-AKI-HTE/data"
-	use ibu-aki-overall.dta
+//open file from data directory
+	use ../data/ibu-aki-overall.dta
 
 ************************************************************************	
 ** ATT
