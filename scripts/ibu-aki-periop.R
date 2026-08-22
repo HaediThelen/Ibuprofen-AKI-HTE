@@ -183,6 +183,9 @@ data %>% count(periOp, periOp.bin)
     
     ggsave(filename = "./results/periop/balplots/Composite-PostOp.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
+    
+    ggsave(filename = "./results/periop/balplots/Composite-PostOp.svg", plot = composite.plot, device = svglite, 
+           width = 10, height = 10, units = "in", dpi = 300)
   
   #Examine Balance in continuous covariate distributions
 
@@ -342,12 +345,14 @@ data %>% count(periOp, periOp.bin)
       ggsave(filename = file_name, plot = plot_i, device = "jpeg", 
              width = 7, height = 9, units = "in", dpi = 300)
     }
-    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by Postoperative Status", strata = "periOp.bin")
+    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by Postoperative Status, Including Baseline Opioid Exposure", strata = "periOp.bin")
     composite.plot
     
     ggsave(filename = "./results/periOp/balplots/Composite-periOp-baseOP.jpeg", plot = composite.plot, device = "jpeg", 
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/periOp/balplots/Composite-periOp-baseOP.pdf", plot = composite.plot, device = "pdf", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-baseOP.svg", plot = composite.plot, device = svglite, 
            width = 10, height = 10, units = "in", dpi = 300)
     
     write.dta(data, "./data/ibu-aki-periOp-opBase.dta")
@@ -402,6 +407,8 @@ data %>% count(periOp, periOp.bin)
     ggsave(filename = "./results/periOp/balplots/Composite-periOp-opBasePOonly.jpeg", plot = composite.plot, device = "jpeg", 
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/periOp/balplots/Composite-periOp-opBasePOonly.pdf", plot = composite.plot, device = "pdf", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    ggsave(filename = "./results/periOp/balplots/Composite-periOp-opBasePOonly.svg", plot = composite.plot, device = svglite, 
            width = 10, height = 10, units = "in", dpi = 300)
     
   # ESS

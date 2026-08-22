@@ -88,6 +88,21 @@ library(cobalt)
   # Median duration of Follow up time 
     data %>% group_by(ibu) %>%
       summarise(median_follow_up_time = median(pTime))
+    data %>%
+      group_by(pain) %>%
+      summarise(n = n(), 
+                med_iqr = paste0(
+                  round(median(pTime, na.rm = TRUE), 1), " (",
+                  round(quantile(pTime, 0.25, na.rm = TRUE), 2), "-",
+                  round(quantile(pTime, 0.75, na.rm = TRUE), 2), ")"),
+                kEver = sum(kEver, na.rm=TRUE))
+    data %>%
+      summarise(n = n(), 
+                med_iqr = paste0(
+                  round(median(pTime, na.rm = TRUE), 1), " (",
+                  round(quantile(pTime, 0.25, na.rm = TRUE), 2), "-",
+                  round(quantile(pTime, 0.75, na.rm = TRUE), 2), ")"),
+                kEver = sum(kEver, na.rm=TRUE))
     
   # AKI By Stage
     # count of AKI by study drug
@@ -189,7 +204,10 @@ library(cobalt)
             width = 7, height = 9, units = "in", dpi = 300)
      ggsave(filename = "./results/overall/balplots/Overall-Balance.pdf", device = "pdf", 
             width = 7, height = 9, units = "in", dpi = 300)     
-   
+     library(svglite)
+     ggsave(filename = "./results/overall/balplots/Overall-Balance.svg", device = svglite::svglite, 
+            width = 7, height = 9, units = "in")     
+     
   # Examine Balance in continuous covariate distributions
      # ATT
        source("./functions/density-plot.R")
@@ -359,7 +377,10 @@ library(cobalt)
   ggsave(filename = "./results/Overall/balplots/Overall-BaseOp-Balance.jpeg", device = "jpeg", 
          width = 7, height = 9, units = "in", dpi = 300)
   ggsave(filename = "./results/Overall/balplots/Overall-BaseOp-Balance.pdf", device = "pdf", 
-         width = 7, height = 9, units = "in", dpi = 300)     
+         width = 7, height = 9, units = "in", dpi = 300) 
+  ggsave(filename = "./results/Overall/balplots/Overall-BaseOp-Balance.svg", device = svglite, 
+         width = 7, height = 9, units = "in") 
+  
   
   write.dta(data, "./data/ibu-aki-overall-opBase.dta")
 
@@ -430,6 +451,14 @@ data <- data %>%
            width = 7, height = 9, units = "in", dpi = 300)
   }
 
+  for (i in seq_along(bal.plots.ATT.clean)) {
+    plot_i <- bal.plots.ATT.clean[[i]]
+    file_name <- paste0("./results/Overall/balplots/balance_plot_overall_balplots.opBasenonPO_", i, ".svg")
+    ggsave(filename = file_name, plot = plot_i, device = svglite, 
+           width = 7, height = 9, units = "in", dpi = 300)
+  }
+  
+  
   # ESS
   # Effective Sample Size ATT
   source("./functions/ess-function.R")

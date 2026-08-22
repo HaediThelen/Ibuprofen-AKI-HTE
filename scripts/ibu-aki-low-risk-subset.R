@@ -178,7 +178,9 @@ if (!dir.exists("./results/low_risk_subset/balplots")) {
 ggsave(filename = "./results/low_risk_subset/balplots/Low-Risk-Balance.jpeg", device = "jpeg", 
        width = 7, height = 9, units = "in", dpi = 300)
 ggsave(filename = "./results/low_risk_subset/balplots/Low-Risk-Balance.pdf", device = "pdf", 
-       width = 7, height = 9, units = "in", dpi = 300)     
+       width = 7, height = 9, units = "in", dpi = 300)  
+ggsave(filename = "./results/low_risk_subset/balplots/Low-Risk-Balance.svg", device = svglite, 
+       width = 7, height = 9, units = "in")  
 
 
 # Examine Balance in continuous covariate distributions

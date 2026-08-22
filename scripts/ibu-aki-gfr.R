@@ -194,6 +194,9 @@ data <- cbind(data, indexGFR.sp) # add the spline columns to the data
            width = 18, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/eGFR/balplots/Composite-eGFR.pdf", plot = composite.plot, device = "pdf", 
            width = 18, height = 10, units = "in", dpi = 300)
+    
+    ggsave(filename = "./results/eGFR/balplots/Composite-eGFR.svg", plot = composite.plot, device = svglite::svglite, 
+           width = 18, height = 10, units = "in")
   
   # Examine Balance in continuous covariate distributions
     # ATT

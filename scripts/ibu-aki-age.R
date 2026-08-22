@@ -205,6 +205,9 @@ data <- read_dta("./data/ibu-aki-data.dta")
     ggsave(filename = "./results/age/balplots/Composite-Age.pdf", plot = composite.plot, device = "pdf", 
            width = 18, height = 10, units = "in", dpi = 300)
     
+    ggsave(filename = "./results/age/balplots/Composite-Age.svg", plot = composite.plot, device = svglite::svglite, 
+           width = 18, height = 10, units = "in")     
+    
   # Examine Balance in continuous covariate distributions
     # ATT
       source("./functions/density-plot.R")

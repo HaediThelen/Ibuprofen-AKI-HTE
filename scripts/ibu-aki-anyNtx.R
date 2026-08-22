@@ -190,6 +190,9 @@ data <- data %>%
          width = 10, height = 10, units = "in", dpi = 300)
   ggsave(filename = "./results/anyNtx/balPlots/Composite-anyNtx.pdf", plot = composite.plot, device = "pdf", 
          width = 10, height = 10, units = "in", dpi = 300)
+  
+  ggsave(filename = "./results/anyNtx/balPlots/Composite-anyNtx.svg", plot = composite.plot, device = svglite, 
+         width = 10, height = 10, units = "in")
 
 # ESS
 # Effective Sample Size ATT

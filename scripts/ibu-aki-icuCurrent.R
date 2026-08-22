@@ -184,7 +184,8 @@ data <- read_dta("./data/ibu-aki-data.dta")
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
-  
+    ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent.svg", plot = composite.plot, device = svglite, 
+           width = 10, height = 10, units = "in", dpi = 300)
 
     # Examine Balance in continuous covariate distributions
     source("./functions/density-plot.R")
@@ -341,12 +342,14 @@ data <- read_dta("./data/ibu-aki-data.dta")
       ggsave(filename = file_name, plot = plot_i, device = "jpeg", 
              width = 7, height = 9, units = "in", dpi = 300)
     }
-    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by ICU Status", strata = "icuCurrent.cat")
+    composite.plot <- composite.bal.plot.bin(bal.plots.ATT.clean, main.title = "Balance Plots by ICU Status, Including Baseline Opioid Exposure", strata = "icuCurrent.cat")
     composite.plot
   
     ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent-baseOP.jpeg", plot = composite.plot, device = "jpeg", 
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent-baseOP.pdf", plot = composite.plot, device = "pdf", 
+           width = 10, height = 10, units = "in", dpi = 300)
+    ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent-baseOP.svg", plot = composite.plot, device = svglite, 
            width = 10, height = 10, units = "in", dpi = 300)
 
 #Export to stata
@@ -404,7 +407,8 @@ data <- read_dta("./data/ibu-aki-data.dta")
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent-opBasePOonly.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
-    
+    ggsave(filename = "./results/icuCurrent/balplots/Composite-icuCurrent-opBasePOonly.svg", plot = composite.plot, device = svglite, 
+           width = 10, height = 10, units = "in", dpi = 300)
     
   # ESS
   # Effective Sample Size ATT

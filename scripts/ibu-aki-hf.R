@@ -186,7 +186,8 @@ data <- read_dta("./data/ibu-aki-data.dta")
            width = 10, height = 10, units = "in", dpi = 300)
     ggsave(filename = "./results/hf/balplots/Composite-HF.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
-  
+    ggsave(filename = "./results/hf/balplots/Composite-HF.svg", plot = composite.plot, device = svglite, 
+           width = 10, height = 10, units = "in", dpi = 300)
 
     # Examine Balance in continuous covariate distributions
     source("./functions/density-plot.R")

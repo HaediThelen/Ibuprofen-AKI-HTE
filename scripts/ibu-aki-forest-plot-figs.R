@@ -255,7 +255,9 @@ if (!dir.exists("./results/SuppAnalyses")) {
 ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOp.jpeg", device = "jpeg", 
        width = 7, height = 3.9, units = "in", dpi = 300)
 ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOp.pdf", device = "pdf", 
-       width = 7, height = 3.9, units = "in", dpi = 300)     
+       width = 7, height = 3.9, units = "in", dpi = 300)  
+ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOp.svg", device = svglite, 
+       width = 7, height = 3.9, units = "in", dpi = 300)  
 
 # Supplementary analysis excluding patietns who received IV opioids in the baseline period
 # Supplementary analysis adjusting for IV opioids in baseline period
@@ -329,6 +331,8 @@ ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOpPOonly.jpeg", device
        width = 7, height = 3.9, units = "in", dpi = 300)
 ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOpPOonly.pdf", device = "pdf", 
        width = 7, height = 3.9, units = "in", dpi = 300) 
+ggsave(filename = "./results/SuppAnalyses/Forest-Plot-BaseOpPOonly.svg", device = svglite, 
+       width = 7, height = 3.9, units = "in", dpi = 300) 
 
 
 # Supplementary analysis evaluating effect modification by any concomitant neprhotoxin
@@ -394,3 +398,6 @@ ggsave(filename = "./results/SuppAnalyses/Forest-Plot-anyNtx.jpeg", device = "jp
        width = 7, height = 2.9, units = "in", dpi = 300)
 ggsave(filename = "./results/SuppAnalyses/Forest-Plot-anyNtx.pdf", device = "pdf", 
        width = 7, height = 3.9, units = "in", dpi = 300) 
+
+ggsave(filename = "./results/SuppAnalyses/Forest-Plot-anyNtx.svg", device = svglite, 
+       width = 7, height = 2.9, units = "in", dpi = 300) 

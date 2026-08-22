@@ -181,6 +181,9 @@ data <- data %>%
     
     ggsave(filename = "./results/dm/balplots/Composite-DM.pdf", plot = composite.plot, device = "pdf", 
            width = 10, height = 10, units = "in", dpi = 300)
+    
+    ggsave(filename = "./results/dm/balplots/Composite-DM.svg", plot = composite.plot, device = svglite, 
+           width = 10, height = 10, units = "in")
   
   #Examine Balance in continuous covariate distributions
 
